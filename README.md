@@ -1,5 +1,7 @@
 # gensurvey
 
+**Version: 0.1.0 developing, currently unstable software, do not use this in production environment**
+
 A small static survey page generator from a JSONC specification.
 
 ## Features
@@ -18,17 +20,17 @@ See `scaffold/example.jsonc` for structure:
 {
   "title": "Survey Title",
   "description": "Survey Description",
-  "gensurvey_server": "http://localhost:11451",
+  "gensurvey_server": "http://localhost:11451", // Use with gensurvey server
   "questions": [ /* ... */ ]
 }
 ```
 
-## Build & Generate
+## Test
 
 From the crate directory:
 
 ```bash
-cargo run -- ../example.jsonc
+cargo run -- ../scaffold/example.jsonc
 ```
 
 Outputs: `dist/index.html`.
@@ -46,14 +48,6 @@ server {
     location / { try_files $uri $uri/ =404; }
 }
 ```
-
-Reload nginx and open http://survey.local/.
-
-## Extending
-
-- Add new question types: extend `QuestionType` enum and adjust `render_question` logic.
-- Add persistent storage: implement a real HTTP backend to receive submissions at `gensurvey_server` URL.
-- Add accessibility improvements: ARIA roles, focus management.
 
 ## License
 GNU AFFERO GENERAL PUBLIC LICENSE 3.0
