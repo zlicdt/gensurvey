@@ -12,6 +12,11 @@ struct Args {
     /// Listen port (default 11451)
     #[arg(short = 'p', long = "port", default_value_t = 11451)]
     port: u16,
+
+    /// Admin mode
+    #[arg(short = 'A', long = "admin_mode", default_value_t = false)]
+    admin_mode: bool,
+
 }
 
 #[derive(Clone)]
@@ -45,17 +50,31 @@ async fn main() {
     )"#).execute(&pool).await.expect("create table");
     let state = AppState { pool };
 
-    let app = Router::new()
-        .route("/health", get(|| async { "OK" }))
-        .route("/submissions", get(list_submissions))
-        .route("/submit", post(receive_submission))
-        .with_state(state.clone())
-        .layer(
-            CorsLayer::new()
-                .allow_origin(Any)
-                .allow_methods(Any)
-                .allow_headers(Any)
-        );
+    let app = if args.admin_mode {
+        Router::new()
+            .route("/health", get(|| async { "OK" }))
+            .route("/submissions", get(list_submissions))
+            .route("/submit", post(receive_submission))
+            .with_state(state.clone())
+            .layer(
+                CorsLayer::new()
+                    .allow_origin(Any)
+                    .allow_methods(Any)
+                    .allow_headers(Any)
+            )
+    } else {
+        // Normal mode, user have no access to /submissions
+        Router::new()
+            .route("/health", get(|| async { "OK" }))
+            .route("/submit", post(receive_submission))
+            .with_state(state.clone())
+            .layer(
+                CorsLayer::new()
+                    .allow_origin(Any)
+                    .allow_methods(Any)
+                    .allow_headers(Any)
+            )
+    };
 
     let addr = SocketAddr::from(([0,0,0,0], args.port));
     info!(%addr, "Server listening");
