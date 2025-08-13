@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Survey Title</title>
+<script>window.tailwind=window.tailwind||{};</script>
+<script src="https://cdn.tailwindcss.com" referrerpolicy="no-referrer"></script>
+<script>
+window.addEventListener('load',()=>{try{var t=document.createElement('span');t.className='hidden';document.body.appendChild(t);var hasTailwind=window.getComputedStyle(t).display==='none';t.remove();if(!hasTailwind){const s=document.createElement('style');s.textContent='body{font-family:system-ui,sans-serif;margin:1.5rem;background:#f9fafb;color:#111827}fieldset{margin-bottom:1.25rem;padding:1rem;border:1px solid #e5e7eb;border-radius:.75rem;background:#fff}button{background:#2563eb;color:#fff;border:none;padding:.6rem 1.1rem;border-radius:.5rem;cursor:pointer}button:hover{background:#1d4ed8}.hidden{display:none}';document.head.appendChild(s);}}catch(e){/* ignore */}});
+</script>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+<main class="max-w-3xl mx-auto p-6 md:p-10">
+<header class="mb-10"><h1 class="text-3xl font-bold tracking-tight mb-3">Survey Title</h1><p class="text-gray-600 text-lg leading-relaxed">Survey Description</p></header>
+<form id="survey-form" class="space-y-8" data-endpoint="http://localhost:11451">
+<fieldset id="q1" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 space-y-5" aria-labelledby="q1-label">
+<div id="q1-label" class="text-lg font-semibold flex items-start gap-2 mb-2">This is a single choice.<span class="text-red-500 font-normal" title="Required">*</span></div>
+<div class="options space-y-2" >
+<label class="flex items-center gap-2 text-gray-800"><input class="h-4 w-4 text-blue-600 focus:ring-blue-600 border-gray-300" type="radio" name="q1" value="red"/> <span>Red</span></label><label class="flex items-center gap-2 text-gray-800"><input class="h-4 w-4 text-blue-600 focus:ring-blue-600 border-gray-300" type="radio" name="q1" value="blue"/> <span>Blue</span></label>
+</div>
+
+</fieldset>
+<fieldset id="q2" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 space-y-5" aria-labelledby="q2-label">
+<div id="q2-label" class="text-lg font-semibold flex items-start gap-2 mb-2">This is a required text question.<span class="text-red-500 font-normal" title="Required">*</span></div>
+<div class="options space-y-2" >
+<input type="text" name="q2" class="w-full max-w-md rounded-md border-gray-300 focus:border-blue-600 focus:ring-blue-600 text-gray-900 placeholder-gray-400" placeholder="Enter text..." required />
+
+</div>
+
+</fieldset>
+<fieldset id="q3" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 space-y-5" aria-labelledby="q3-label">
+<div id="q3-label" class="text-lg font-semibold flex items-start gap-2 mb-2">This is an optional text question.</div>
+<div class="options space-y-2" >
+<input type="text" name="q3" class="w-full max-w-md rounded-md border-gray-300 focus:border-blue-600 focus:ring-blue-600 text-gray-900 placeholder-gray-400" placeholder="Enter text..." />
+
+</div>
+
+</fieldset>
+<fieldset id="q4" class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 space-y-5" aria-labelledby="q4-label">
+<div id="q4-label" class="text-lg font-semibold flex items-start gap-2 mb-2">This is a required multiple choice question.<span class="text-red-500 font-normal" title="Required">*</span></div>
+<div class="options space-y-2" data-required-group=true>
+<label class="flex items-center gap-2 text-gray-800"><input class="h-4 w-4 text-blue-600 focus:ring-blue-600 rounded border-gray-300" type="checkbox" name="q4" value="option1"/> <span>Option 1</span></label><label class="flex items-center gap-2 text-gray-800"><input class="h-4 w-4 text-blue-600 focus:ring-blue-600 rounded border-gray-300" type="checkbox" name="q4" value="option2"/> <span>Option 2</span></label>
+</div>
+<div class="subq border-l-4 border-gray-200 pl-4 mt-4 space-y-2" id="sub-q4_1">
+<div class="text-sm font-medium text-gray-700 flex items-center gap-2">This is a sub-question for option 1.<span class="text-red-500" title="Required">*</span></div>
+<input type="text" name="q4_1" class="w-full max-w-sm rounded-md border-gray-300 focus:border-blue-600 focus:ring-blue-600 text-gray-900 placeholder-gray-400" placeholder="Enter text..." required />
+</div>
+<div class="subq border-l-4 border-gray-200 pl-4 mt-4 space-y-2 hidden" id="sub-q4_2">
+<div class="text-sm font-medium text-gray-700 flex items-center gap-2">This is a sub-question for option 2.</div>
+<input type="text" name="q4_2" class="w-full max-w-sm rounded-md border-gray-300 focus:border-blue-600 focus:ring-blue-600 text-gray-900 placeholder-gray-400" placeholder="Enter text..." /><input type="hidden" data-display-parent="q4" data-display-value="option1"/>
+</div>
+
+</fieldset>
+
+<div><button type="submit" class="inline-flex items-center gap-2 px-6 py-2 rounded-md bg-blue-600 text-white font-medium shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition">Submit<span class="sr-only"> survey</span></button></div>
+</form>
+<div id="result" class="text-sm text-gray-600 mt-6"></div>
+</main>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+{
+    "title": "Survey Title",
+    "description": "Survey Description",
+    "gensurvey_server": "http://localhost:11451",
+    "questions": [
+        {
+            "id": "q1",
+            "text": "This is a single choice.",
+            "type": "single_choice",
+            "options": [
+                {
+                    "value": "red",
+                    "label": "Red"
+                },
+                {
+                    "value": "blue",
+                    "label": "Blue"
+                }
+            ],
+            "required": true
+        },
+        {
+            "id": "q2",
+            "text": "This is a required text question.",
+            "type": "text",
+            "required": true
+        },
+        {
+            "id": "q3",
+            "text": "This is an optional text question.",
+            "type": "text",
+            "required": false
+        },
+        {
+            "id": "q4",
+            "text": "This is a required multiple choice question.",
+            "type": "multiple_choice",
+            "options": [
+                {
+                    "value": "option1",
+                    "label": "Option 1"
+                },
+                {
+                    "value": "option2",
+                    "label": "Option 2"
+                }
+            ],
+            "required": true,
+            "sub_questions": [
+                {
+                    "id": "q4_1",
+                    "text": "This is a sub-question for option 1.",
+                    "type": "text",
+                    "required": true,
+                    "hide": false
+                },
+                {
+                    "id": "q4_2",
+                    "text": "This is a sub-question for option 2.",
+                    "type": "text",
+                    "required": false,
+                    "hide": true,
+                    "when_display": {
+                        "condition": "q4_1",
+                        "value": "option1"
+                    }
+                }
+            ]
+        }
+    ]
+}
