@@ -56,4 +56,4 @@ Reload nginx and open http://survey.local/.
 - Add accessibility improvements: ARIA roles, focus management.
 
 ## License
-MIT (customize as needed).
+GNU AFFERO GENERAL PUBLIC LICENSE 3.0
