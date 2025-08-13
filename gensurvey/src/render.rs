@@ -4,10 +4,19 @@ use crate::templates::{PAGE_SHELL, QUESTION_FIELDSET, SUB_QUESTION_BLOCK, fill};
 pub fn render_full_html(survey: &Survey) -> String {
   let mut content = String::new();
   for q in &survey.questions { content.push_str(&render_question(q)); }
+  // Derive submission endpoint: if user supplies a base like http://host:port, append /submit.
   let endpoint = survey
     .gensurvey_server
     .as_ref()
-    .map(|e| escape(e))
+    .map(|raw| {
+      let mut url = raw.trim().to_string();
+      if !url.is_empty() && !url.contains('?') {
+        // remove trailing slash (but keep single root slash after scheme)
+        while url.ends_with('/') && !url.ends_with("//") { url.pop(); }
+        if !url.ends_with("/submit") { url.push_str("/submit"); }
+      }
+      escape(&url)
+    })
     .unwrap_or_else(|| "".to_string());
   fill(PAGE_SHELL.to_string(), &[
     ("title", &escape(&survey.title)),
