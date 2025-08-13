@@ -63,7 +63,7 @@ fn main() -> anyhow::Result<()> {
     // Write external JS
     std::fs::write(out_dir.join("script.js"), scripts::SURVEY_SCRIPT)?;
     eprintln!("Generated: {}", out_file.display());
-    eprintln!("You can serve the 'dist' directory with nginx or any static server.");
+    eprintln!("You can serve the '{}' directory with nginx or any static server.", out_dir.display());
     Ok(())
 }
 
