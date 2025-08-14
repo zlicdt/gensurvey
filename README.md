@@ -4,8 +4,6 @@
 <img alt="License" src="https://img.shields.io/github/license/zlicdt/gensurvey?label=License" height=22.5>
 </p>
 
-**Version: 0.1.0 developing, currently unstable software, do not use this in production environment**
-
 A small static survey page generator from a JSONC specification.
 
 ## Features

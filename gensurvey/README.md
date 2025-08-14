@@ -26,6 +26,8 @@ Options:
 
 ## Survey Spec Fields
 
+Please refer to https://github.com/zlicdt/gensurvey/blob/main/scaffold/example.jsonc for the format.
+
 - `title`: String
 - `description`: String
 - `gensurvey_server`: Optional base URL of server; `/submit` appended for POST endpoint.

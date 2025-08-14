@@ -90,5 +90,5 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn print_usage() {
-    eprintln!("Usage: gensurvey -i <survey.jsonc> -o <output_dir>\n\nGenerate static survey HTML into a new output directory. The output directory must not already exist.\n\nOptions:\n  -i, --input <PATH>        Path to survey spec file (.json or .jsonc)\n  -o, --output <DIR>        Output directory to create (must not exist)\n  -h, --help                Show this help message\n");
+    eprintln!("Usage: gensurvey -i <survey.jsonc> -o <output_dir>\n\nGenerate static survey HTML into a new output directory. The output directory must not already exist.\n\nOptions:\n  -i, --input <PATH>        Path to survey spec file (.json or .jsonc)\n  -o, --output <DIR>        Output directory to create (must not exist)\n  -h, --help                Show this help message\n\nPlease refer to https://github.com/zlicdt/gensurvey/blob/main/scaffold/example.jsonc for the format.\n");
 }

@@ -1,31 +1,62 @@
+//
+//  example.jsonc
+//  gensurvey
+//
+//  Created by zlicdt on 2025/8/13.
+//  Copyright (c) 2025 zlicdt. All rights reserved.
+//
+//  This file is part of gensurvey.
+//
+//  gensurvey is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Affero General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  gensurvey is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//  GNU Affero General Public License for more details.
+//
+//  You should have received a copy of the GNU Affero General Public License
+//  along with gensurvey. If not, see <https://www.gnu.org/licenses/>.
+//
+
+// This is an example for gensurvey source of format.
+
 {
+    // Survey metadata
     "title": "Survey Title",
     "description": "Survey Description",
     "gensurvey_server": "http://localhost:11451",
+    // Questions
     "questions": [
         {
+            // A single choice
             "id": "q1",
             "text": "This is a single choice.",
             "type": "single_choice",
             "options": [
                 {
-                    "value": "red",
-                    "label": "Red"
+                    // "value" field would be record to your server database
+                    "value": "o1",
+                    "label": "Option 1"
                 },
                 {
-                    "value": "blue",
-                    "label": "Blue"
+                    "value": "o2",
+                    "label": "Option 2"
                 }
             ],
             "required": true
         },
         {
+            // A text question
             "id": "q2",
             "text": "This is a required text question.",
             "type": "text",
             "required": true
         },
         {
+            // A optional text question
             "id": "q3",
             "text": "This is an optional text question.",
             "type": "text",
@@ -37,32 +68,41 @@
             "type": "multiple_choice",
             "options": [
                 {
-                    "value": "option1",
+                    "value": "o1",
                     "label": "Option 1"
                 },
                 {
-                    "value": "option2",
+                    "value": "o2",
                     "label": "Option 2"
                 }
             ],
             "required": true,
+            // Sub-questions have same format with questions
             "sub_questions": [
                 {
                     "id": "q4_1",
                     "text": "This is a sub-question for option 1.",
                     "type": "text",
                     "required": true,
-                    "hide": false
+                    // "hide": true means this question will not be shown
+                    "hide": true,
+                    // "when_display" defines the condition to show this question
+                    "when_display": {
+                        "condition": "q4",
+                        "value": "o1"
+                    }
                 },
                 {
                     "id": "q4_2",
                     "text": "This is a sub-question for option 2.",
                     "type": "text",
                     "required": false,
-                    "hide": true,
+                    "hide": false, // Note this "hide": false
+                    // The priority of "when_display" is higher than "hide"
+                    // If you set "when_display" field, "hide" field will be ignored
                     "when_display": {
-                        "condition": "q4_1",
-                        "value": "option1"
+                        "condition": "q4",
+                        "value": "o2"
                     }
                 }
             ]
