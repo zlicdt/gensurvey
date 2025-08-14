@@ -27,6 +27,9 @@ use clap::Parser;
 use tracing::{info, error};
 use sqlx::Row; // for dynamic row access
 use tower_http::cors::{CorsLayer, Any};
+use std::path::Path;
+use sqlx::sqlite::SqliteConnectOptions;
+use std::str::FromStr;
 
 #[derive(Parser, Debug)]
 #[command(name="gensurvey-server", version, about="Simple survey submission receiver")] 
@@ -39,6 +42,9 @@ struct Args {
     #[arg(short = 'A', long = "admin_mode", default_value_t = false)]
     admin_mode: bool,
 
+    /// Path to sqlite database file (default /usr/lib/gensurvey/gensurvey.db)
+    #[arg(long = "db-path", value_name = "PATH", default_value = "/usr/lib/gensurvey/gensurvey.db")]
+    db_path: String,
 }
 
 #[derive(Clone)]
@@ -63,7 +69,24 @@ struct SubmitResponse { id: u64, status: &'static str }
 async fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
     let args = Args::parse();
-    let pool = sqlx::SqlitePool::connect("sqlite:file:gensurvey.db?mode=rwc").await.expect("connect sqlite");
+
+    // Ensure parent directory exists (ignore error if lacking permission; will surface in connect)
+    if let Some(parent) = Path::new(&args.db_path).parent() {
+        if !parent.exists() {
+            if let Err(e) = std::fs::create_dir_all(parent) {
+                error!(dir=?parent, error=%e, "Failed to create db directory");
+            }
+        }
+    }
+
+    // Try multiple forms to build connect options. Primary: treat provided path as plain filename.
+    let connect_opts = SqliteConnectOptions::from_str(&args.db_path)
+        .or_else(|_| SqliteConnectOptions::from_str(&format!("sqlite://{}", &args.db_path)))
+        .or_else(|_| SqliteConnectOptions::from_str(&format!("sqlite:{}", &args.db_path)))
+        .map(|o| o.create_if_missing(true))
+        .unwrap_or_else(|e| panic!("Invalid sqlite path '{}': {e}", &args.db_path));
+
+    let pool = sqlx::SqlitePool::connect_with(connect_opts).await.expect("connect sqlite");
     // migrate table
     sqlx::query(r#"CREATE TABLE IF NOT EXISTS submissions(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
