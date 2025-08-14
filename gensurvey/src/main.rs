@@ -27,50 +27,29 @@ mod scripts;
 
 use std::fs::File;
 use std::path::PathBuf;
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(
+    name="gensurvey",
+    version,
+    about="Generate static survey HTML from a JSON/JSONC spec",
+    after_help = "Please refer to https://github.com/zlicdt/gensurvey/blob/main/scaffold/example.jsonc for the format."
+)] 
+struct Args {
+    /// Path to survey spec file (.json / .jsonc)
+    #[arg(short = 'i', long = "input", value_name = "FILE")]
+    input: PathBuf,
+
+    /// Output directory to create (must not already exist)
+    #[arg(short = 'o', long = "output", value_name = "DIR")]
+    output: PathBuf,
+}
 
 fn main() -> anyhow::Result<()> {
-    // CLI parsing: require -i/--input <path>. Provide help if missing.
-    // CLI parsing: require -o/--output <path>. Provide help if missing.
-    let mut args = std::env::args().skip(1);
-    let mut input: Option<PathBuf> = None;
-    let mut output: Option<PathBuf> = None;
-    while let Some(arg) = args.next() {
-        match arg.as_str() {
-            "-i" | "--input" => {
-                if let Some(p) = args.next() { input = Some(PathBuf::from(p)); }
-                else {
-                    eprintln!("Error: -i/--input expects a path argument.\n");
-                    print_usage();
-                    std::process::exit(1);
-                }
-            }
-            "-o" | "--output" => {
-                if let Some(p) = args.next() { output = Some(PathBuf::from(p)); }
-                else {
-                    eprintln!("Error: -o/--output expects a directory path.\n");
-                    print_usage();
-                    std::process::exit(1);
-                }
-            }
-            "-h" | "--help" => {
-                print_usage();
-                return Ok(());
-            }
-            other => {
-                eprintln!("Unknown argument: {other}\n");
-                print_usage();
-                std::process::exit(1);
-            }
-        }
-    }
-    let spec_path = input.unwrap_or_else(|| {
-        print_usage();
-        std::process::exit(1);
-    });
-    let out_dir = output.unwrap_or_else(|| {
-        print_usage();
-        std::process::exit(1);
-    });
+    let args = Args::parse();
+    let spec_path = args.input;
+    let out_dir = args.output;
     eprintln!("Loading survey spec: {}", spec_path.display());
     let file = File::open(&spec_path)?;
     let survey = model::Survey::from_reader(file)?;
@@ -89,6 +68,4 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn print_usage() {
-    eprintln!("Usage: gensurvey -i <survey.jsonc> -o <output_dir>\n\nGenerate static survey HTML into a new output directory. The output directory must not already exist.\n\nOptions:\n  -i, --input <PATH>        Path to survey spec file (.json or .jsonc)\n  -o, --output <DIR>        Output directory to create (must not exist)\n  -h, --help                Show this help message\n\nPlease refer to https://github.com/zlicdt/gensurvey/blob/main/scaffold/example.jsonc for the format.\n");
-}
+// Legacy print_usage removed; clap provides help.

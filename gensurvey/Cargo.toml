@@ -10,3 +10,4 @@ anyhow = "1"
 regex = "1"
 thiserror = "1"
 htmlescape = "0.3"
+clap = { version = "4", features = ["derive"] }
