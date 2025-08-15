@@ -1,0 +1,4 @@
+complete -c gensurvey -s i -l input -d 'Path to survey spec file (.json / .jsonc)' -r -F
+complete -c gensurvey -s o -l output -d 'Output directory to create (must not already exist)' -r -F
+complete -c gensurvey -s h -l help -d 'Print help'
+complete -c gensurvey -s V -l version -d 'Print version'

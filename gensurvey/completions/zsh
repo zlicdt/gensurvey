@@ -1,0 +1,71 @@
+#compdef gensurvey
+
+autoload -U is-at-least
+
+_gensurvey() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'-i+[Path to survey spec file (.json / .jsonc)]:FILE:_files' \
+'--input=[Path to survey spec file (.json / .jsonc)]:FILE:_files' \
+'-o+[Output directory to create (must not already exist)]:DIR:_files' \
+'--output=[Output directory to create (must not already exist)]:DIR:_files' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+&& ret=0
+}
+
+(( $+functions[_gensurvey_commands] )) ||
+_gensurvey_commands() {
+    local commands; commands=()
+    _describe -t commands 'gensurvey commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_gensurvey" ]; then
+    _gensurvey "$@"
+else
+    compdef _gensurvey gensurvey
+fi
+
+use builtin;
+use str;
+
+set edit:completion:arg-completer[gensurvey] = {|@words|
+    fn spaces {|n|
+        builtin:repeat $n ' ' | str:join ''
+    }
+    fn cand {|text desc|
+        edit:complex-candidate $text &display=$text' '(spaces (- 14 (wcswidth $text)))$desc
+    }
+    var command = 'gensurvey'
+    for word $words[1..-1] {
+        if (str:has-prefix $word '-') {
+            break
+        }
+        set command = $command';'$word
+    }
+    var completions = [
+        &'gensurvey'= {
+            cand -i 'Path to survey spec file (.json / .jsonc)'
+            cand --input 'Path to survey spec file (.json / .jsonc)'
+            cand -o 'Output directory to create (must not already exist)'
+            cand --output 'Output directory to create (must not already exist)'
+            cand -h 'Print help'
+            cand --help 'Print help'
+            cand -V 'Print version'
+            cand --version 'Print version'
+        }
+    ]
+    $completions[$command]
+}
