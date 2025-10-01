@@ -55,24 +55,24 @@ fn render_question(q: &Question) -> String {
     match q.kind {
   QuestionType::SingleChoice => {
       for (idx,opt) in q.options.iter().enumerate() {
-    controls.push_str("<label class=\"flex items-center gap-2 text-gray-800\"><input class=\"h-4 w-4 text-blue-600 focus:ring-blue-600 border-gray-300\" type=\"radio\" name=\"");
+    controls.push_str("<label class=\"group flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer transition-all duration-200\"><input class=\"h-5 w-5 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 cursor-pointer\" type=\"radio\" name=\"");
         controls.push_str(&escape(&q.id));
         controls.push_str("\" value=\"");
         controls.push_str(&escape(&opt.value));
         controls.push_str("\"");
         if q.required && idx==0 { /* placeholder */ }
-        controls.push_str("/> <span>");
+        controls.push_str("/> <span class=\"text-base font-medium text-gray-700 group-hover:text-gray-900\">");
         controls.push_str(&escape(&opt.label));
         controls.push_str("</span></label>");
       }
     }
     QuestionType::MultipleChoice => {
       for opt in &q.options { 
-        controls.push_str("<label class=\"flex items-center gap-2 text-gray-800\"><input class=\"h-4 w-4 text-blue-600 focus:ring-blue-600 rounded border-gray-300\" type=\"checkbox\" name=\"");
+        controls.push_str("<label class=\"group flex items-center gap-3 p-4 rounded-xl border-2 border-gray-200 hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer transition-all duration-200\"><input class=\"h-5 w-5 text-indigo-600 focus:ring-2 focus:ring-indigo-500 rounded border-gray-300 cursor-pointer\" type=\"checkbox\" name=\"");
         controls.push_str(&escape(&q.id));
         controls.push_str("\" value=\"");
         controls.push_str(&escape(&opt.value));
-        controls.push_str("\"/> <span>");
+        controls.push_str("\"/> <span class=\"text-base font-medium text-gray-700 group-hover:text-gray-900\">");
         controls.push_str(&escape(&opt.label));
         controls.push_str("</span></label>");
       }
@@ -80,7 +80,7 @@ fn render_question(q: &Question) -> String {
     QuestionType::Text => {
       controls.push_str("<input type=\"text\" name=\"");
       controls.push_str(&escape(&q.id));
-      controls.push_str("\" class=\"w-full max-w-md rounded-md border-gray-300 focus:border-blue-600 focus:ring-blue-600 text-gray-900 placeholder-gray-400\" placeholder=\"Enter text...\" ");
+      controls.push_str("\" class=\"w-full rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 text-gray-900 placeholder-gray-400 px-4 py-3 transition-all duration-200\" placeholder=\"Enter your answer...\" ");
       if q.required { controls.push_str("required "); }
       controls.push_str("/>\n");
     }
@@ -109,14 +109,14 @@ fn render_sub_question(_parent: &Question, sub: &SubQuestion) -> String {
     QuestionType::Text => {
       input.push_str("<input type=\"text\" name=\"");
       input.push_str(&escape(&sub.id));
-  input.push_str("\" class=\"w-full max-w-sm rounded-md border-gray-300 focus:border-blue-600 focus:ring-blue-600 text-gray-900 placeholder-gray-400\" placeholder=\"Enter text...\" ");
+  input.push_str("\" class=\"w-full rounded-lg border-2 border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 text-gray-900 placeholder-gray-400 px-4 py-2.5 bg-white transition-all duration-200\" placeholder=\"Enter your answer...\" ");
       if sub.required { input.push_str("required "); }
       input.push_str("/>");
     }
     QuestionType::SingleChoice | QuestionType::MultipleChoice => {
       input.push_str("<input type=\"text\" name=\"");
       input.push_str(&escape(&sub.id));
-  input.push_str("\" class=\"w-full max-w-sm rounded-md border-gray-300 focus:border-blue-600 focus:ring-blue-600 text-gray-900\" />");
+  input.push_str("\" class=\"w-full rounded-lg border-2 border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 text-gray-900 px-4 py-2.5 bg-white transition-all duration-200\" />");
     }
   }
   let mut condition_marker = String::new();

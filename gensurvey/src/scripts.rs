@@ -85,23 +85,29 @@ pub const SURVEY_SCRIPT: &str = r#"// Dynamic behavior + submission + conditiona
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const v = validate();
-    if (!v.ok) { result.textContent = v.message; result.style.color = '#d00'; return; }
+    if (!v.ok) { 
+      result.innerHTML = '<div class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-red-50 border-2 border-red-200 text-red-700"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg><span>' + v.message + '</span></div>';
+      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return; 
+    }
     const payload = collect();
-    result.style.color = '#333';
-    result.textContent = 'Submitting...';
+    result.innerHTML = '<div class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-50 border-2 border-indigo-200 text-indigo-700"><svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Submitting your response...</span></div>';
     try {
       if (endpoint && endpoint !== 'null') {
         const res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
         if (!res.ok) throw new Error('Server returned '+res.status);
-        result.textContent = 'Submitted successfully.';
+        result.innerHTML = '<div class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-green-50 border-2 border-green-200 text-green-700 animate-pulse"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg><span>Successfully submitted! Thank you for your response.</span></div>';
+        form.style.opacity = '0.6';
+        form.style.pointerEvents = 'none';
       } else {
         console.log('Survey submission (no endpoint configured)', payload);
-        result.textContent = 'Submitted (console only demo).';
+        result.innerHTML = '<div class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-50 border-2 border-blue-200 text-blue-700"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg><span>Demo mode: Response logged to console.</span></div>';
       }
+      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } catch(err){
       console.error(err);
-      result.textContent = 'Submission failed.';
-      result.style.color = '#d00';
+      result.innerHTML = '<div class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-red-50 border-2 border-red-200 text-red-700"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg><span>Submission failed. Please try again.</span></div>';
+      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   });
 })();
