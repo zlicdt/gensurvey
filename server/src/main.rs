@@ -21,7 +21,7 @@
 //  along with gensurvey. If not, see <https://www.gnu.org/licenses/>.
 //
 use std::{net::SocketAddr};
-use axum::{routing::{get, post}, Router, Json, extract::State};
+use axum::{routing::{get, post}, Router, Json, extract::State, http::StatusCode, response::{IntoResponse, Response}};
 use serde::{Deserialize, Serialize};
 use clap::Parser;
 use tracing::{info, error};
@@ -65,8 +65,38 @@ pub struct SubmissionRecord {
 #[derive(Debug, Serialize)]
 struct SubmitResponse { id: u64, status: &'static str }
 
+#[derive(Debug, Serialize)]
+struct ErrorResponse { error: String }
+
+// Custom error type for better error handling
+struct AppError(anyhow::Error);
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        error!("Request error: {}", self.0);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ErrorResponse { 
+                error: "Internal server error".to_string() 
+            })
+        ).into_response()
+    }
+}
+
+impl From<sqlx::Error> for AppError {
+    fn from(err: sqlx::Error) -> Self {
+        Self(err.into())
+    }
+}
+
+impl From<serde_json::Error> for AppError {
+    fn from(err: serde_json::Error) -> Self {
+        Self(err.into())
+    }
+}
+
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt().with_env_filter("info").init();
     let args = Args::parse();
 
@@ -84,15 +114,18 @@ async fn main() {
         .or_else(|_| SqliteConnectOptions::from_str(&format!("sqlite://{}", &args.db_path)))
         .or_else(|_| SqliteConnectOptions::from_str(&format!("sqlite:{}", &args.db_path)))
         .map(|o| o.create_if_missing(true))
-        .unwrap_or_else(|e| panic!("Invalid sqlite path '{}': {e}", &args.db_path));
+        .map_err(|e| anyhow::anyhow!("Invalid sqlite path '{}': {}", &args.db_path, e))?;
 
-    let pool = sqlx::SqlitePool::connect_with(connect_opts).await.expect("connect sqlite");
+    let pool = sqlx::SqlitePool::connect_with(connect_opts).await
+        .map_err(|e| anyhow::anyhow!("Failed to connect to database: {}", e))?;
+    
     // migrate table
     sqlx::query(r#"CREATE TABLE IF NOT EXISTS submissions(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         received_at TEXT NOT NULL,
         data TEXT NOT NULL
-    )"#).execute(&pool).await.expect("create table");
+    )"#).execute(&pool).await
+        .map_err(|e| anyhow::anyhow!("Failed to create table: {}", e))?;
     let state = AppState { pool };
 
     let app = if args.admin_mode {
@@ -123,35 +156,51 @@ async fn main() {
 
     let addr = SocketAddr::from(([0,0,0,0], args.port));
     info!(%addr, "Server listening");
-    if let Err(e) = axum::serve(tokio::net::TcpListener::bind(addr).await.unwrap(), app).await {
-        error!(error=%e, "Server error");
-    }
+    
+    let listener = tokio::net::TcpListener::bind(addr).await
+        .map_err(|e| anyhow::anyhow!("Failed to bind to {}: {}", addr, e))?;
+    
+    axum::serve(listener, app).await
+        .map_err(|e| anyhow::anyhow!("Server error: {}", e))?;
+    
+    Ok(())
 }
 
-async fn receive_submission(State(state): State<AppState>, Json(payload): Json<SubmissionPayload>) -> Json<SubmitResponse> {
+async fn receive_submission(
+    State(state): State<AppState>, 
+    Json(payload): Json<SubmissionPayload>
+) -> Result<Json<SubmitResponse>, AppError> {
     let ts = chrono::Utc::now().to_rfc3339();
-    let data_str = serde_json::to_string(&payload.0).unwrap();
+    let data_str = serde_json::to_string(&payload.0)?;
+    
     let rec_id = sqlx::query("INSERT INTO submissions(received_at,data) VALUES(?,?)")
         .bind(ts)
         .bind(data_str)
         .execute(&state.pool)
-        .await
-        .unwrap()
+        .await?
         .last_insert_rowid();
-    Json(SubmitResponse { id: rec_id as u64, status: "stored" })
+    
+    Ok(Json(SubmitResponse { 
+        id: rec_id as u64, 
+        status: "stored" 
+    }))
 }
 
-async fn list_submissions(State(state): State<AppState>) -> Json<Vec<SubmissionRecord>> {
+async fn list_submissions(
+    State(state): State<AppState>
+) -> Result<Json<Vec<SubmissionRecord>>, AppError> {
     let rows = sqlx::query("SELECT id, received_at, data FROM submissions ORDER BY id DESC")
         .fetch_all(&state.pool)
-        .await
-        .unwrap();
+        .await?;
+    
     let mapped: Vec<SubmissionRecord> = rows.into_iter().map(|row| {
         let id: i64 = row.get("id");
         let received_at: String = row.get("received_at");
         let data_str: String = row.get("data");
-        let data: serde_json::Value = serde_json::from_str(&data_str).unwrap_or(serde_json::Value::Null);
+        let data: serde_json::Value = serde_json::from_str(&data_str)
+            .unwrap_or(serde_json::Value::Null);
         SubmissionRecord { id, received_at, data }
     }).collect();
-    Json(mapped)
+    
+    Ok(Json(mapped))
 }
